@@ -9,13 +9,21 @@ import {
   DataConverter,
   DefaultEncodedFailureAttributes,
 } from '@temporalio/common';
+import { proxyActivities } from '@temporalio/workflow';
 import { WorkflowFailedError } from '@temporalio/client';
 import { decodeFromPayloadsAtIndex } from '@temporalio/common/lib/internal-non-workflow';
 
 export const failureConverter = new DefaultFailureConverter({ encodeCommonAttributes: true });
 
-export async function workflow(): Promise<never> {
-  throw ApplicationFailure.create({ message: 'error message' });
+class Activities {
+  public raise = async () => {
+    throw ApplicationFailure.nonRetryable('error message');
+  };
+}
+
+export async function workflow(): Promise<void> {
+  const activities = proxyActivities<Activities>({ startToCloseTimeout: '1m' });
+  await activities.raise();
 }
 
 test('Client and Worker use provided failureConverter', async (t) => {
@@ -35,6 +43,7 @@ test('Client and Worker use provided failureConverter', async (t) => {
     const taskQueue = 'test';
     const worker = await Worker.create({
       connection: env.nativeConnection,
+      activities: new Activities(),
       workflowsPath: __filename,
       taskQueue,
       dataConverter,
@@ -44,19 +53,38 @@ test('Client and Worker use provided failureConverter', async (t) => {
     // Run the workflow, expect error with message and stack trace
     const handle = await env.client.workflow.start(workflow, { taskQueue, workflowId: randomUUID() });
     const err = (await worker.runUntil(t.throwsAsync(handle.result()))) as WorkflowFailedError;
-    t.is(err.cause?.message, 'error message');
-    t.true(err.cause?.stack?.startsWith('ApplicationFailure: error message\n'));
+    console.log(err);
+    t.is(err.cause?.message, 'Activity execution failed');
+    t.is(err.cause?.cause?.message, 'error message');
+    t.true(err.cause?.cause?.stack?.startsWith('ApplicationFailure: error message\n'));
 
     // Verify failure was indeed encoded
     const { events } = await fetchWorkflowHistory(env.client, handle.workflowId);
-    const payload = events?.[events.length - 1].workflowExecutionFailedEventAttributes?.failure?.encodedAttributes;
-    const attrs = await decodeFromPayloadsAtIndex<DefaultEncodedFailureAttributes>(
-      env.client.options.loadedDataConverter,
-      0,
-      payload ? [payload] : undefined
-    );
-    t.is(attrs.message, 'error message');
-    t.true(attrs.stack_trace.startsWith('ApplicationFailure: error message\n'));
+    const { failure } = events?.[events.length - 1].workflowExecutionFailedEventAttributes ?? {};
+    {
+      const payload = failure?.encodedAttributes;
+      const attrs = await decodeFromPayloadsAtIndex<DefaultEncodedFailureAttributes>(
+        env.client.options.loadedDataConverter,
+        0,
+        payload ? [payload] : undefined
+      );
+      t.is(failure?.message, 'Encoded failure');
+      t.is(failure?.stackTrace, '');
+      t.is(attrs.message, 'Activity task failed'); // Hmmm..
+      t.is(attrs.stack_trace, '');
+    }
+    {
+      const payload = failure?.cause?.encodedAttributes;
+      const attrs = await decodeFromPayloadsAtIndex<DefaultEncodedFailureAttributes>(
+        env.client.options.loadedDataConverter,
+        0,
+        payload ? [payload] : undefined
+      );
+      t.is(failure?.cause?.message, 'Encoded failure');
+      t.is(failure?.stackTrace, '');
+      t.is(attrs.message, 'error message');
+      t.true(attrs.stack_trace.startsWith('ApplicationFailure: error message\n'));
+    }
   } finally {
     await env.teardown();
   }
