@@ -31,7 +31,7 @@
     "wait-namespace": "node ./scripts/wait-on-temporal.mjs",
     "lint": "eslint packages/*/src --ext .ts --no-error-on-unmatched-pattern && prettier --end-of-line auto --check .",
     "lint.prune": "ts-prune --error -p tsconfig.prune.json --ignore \"used in module\" --skip \".d.ts\"",
-    "format": "prettier --write .",
+    "format": "eslint packages/*/src --ext .ts --no-error-on-unmatched-pattern --fix && prettier --write .",
     "clean": "node ./scripts/clean.mjs",
     "docs": "lerna run --stream maybe-install-deps-and-build-docs"
   },

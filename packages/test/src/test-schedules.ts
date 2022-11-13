@@ -1,11 +1,11 @@
-import { RUN_INTEGRATION_TESTS } from './helpers';
-import anyTest, { TestInterface } from 'ava';
 import { randomUUID } from 'crypto';
+import anyTest, { TestInterface } from 'ava';
 import { Client, defaultPayloadConverter } from '@temporalio/client';
 import asyncRetry from 'async-retry';
 import { msToNumber } from '@temporalio/common/lib/time';
 import { CalendarSpec, CalendarSpecDescription, ScheduleSummary } from '@temporalio/client/lib/schedule-types';
 import { ScheduleHandle } from '@temporalio/client/lib/schedule-client';
+import { RUN_INTEGRATION_TESTS } from './helpers';
 
 export interface Context {
   client: Client;

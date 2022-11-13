@@ -1,3 +1,7 @@
+import { promisify } from 'util';
+import * as v8 from 'v8';
+import * as fs from 'fs';
+import * as os from 'os';
 import * as native from '@temporalio/core-bridge';
 import {
   pollLogs,
@@ -15,16 +19,12 @@ import { temporal } from '@temporalio/proto';
 import { Heap } from 'heap-js';
 import { BehaviorSubject, lastValueFrom, of } from 'rxjs';
 import { concatMap, delay, map, repeat } from 'rxjs/operators';
-import { promisify } from 'util';
+import { History } from '@temporalio/common/lib/proto-utils';
 import * as errors from './errors';
 import { DefaultLogger, LogEntry, Logger, LogTimestamp, timeOfDayToBigint } from './logger';
 import { compileConnectionOptions, getDefaultConnectionOptions, NativeConnectionOptions } from './connection-options';
 import { byteArrayToBuffer, toMB } from './utils';
 import pkg from './pkg';
-import { History } from '@temporalio/common/lib/proto-utils';
-import * as v8 from 'v8';
-import * as fs from 'fs';
-import * as os from 'os';
 
 export { History };
 

@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import path from 'path';
+import vm from 'vm';
 import {
   ApplicationFailure,
   defaultPayloadConverter,
@@ -16,8 +18,6 @@ import { WorkflowInfo } from '@temporalio/workflow';
 import anyTest, { ExecutionContext, TestInterface } from 'ava';
 import dedent from 'dedent';
 import Long from 'long'; // eslint-disable-line import/no-named-as-default
-import path from 'path';
-import vm from 'vm';
 import * as activityFunctions from './activities';
 import { cleanStackTrace, u8 } from './helpers';
 

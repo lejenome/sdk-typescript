@@ -1,3 +1,8 @@
+import crypto from 'crypto';
+import fs from 'fs/promises';
+import * as path from 'node:path';
+import * as vm from 'node:vm';
+import { promisify } from 'util';
 import * as otel from '@opentelemetry/api';
 import { SpanContext } from '@opentelemetry/api';
 import { Info as ActivityInfo } from '@temporalio/activity';
@@ -33,10 +38,6 @@ import { errorMessage } from '@temporalio/common/lib/type-helpers';
 import * as native from '@temporalio/core-bridge';
 import { coresdk, temporal } from '@temporalio/proto';
 import { DeterminismViolationError, SinkCall, WorkflowInfo } from '@temporalio/workflow';
-import crypto from 'crypto';
-import fs from 'fs/promises';
-import * as path from 'node:path';
-import * as vm from 'node:vm';
 import {
   BehaviorSubject,
   concatMap,
@@ -54,7 +55,6 @@ import {
 } from 'rxjs';
 import { delay, filter, first, ignoreElements, last, map, mergeMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type { RawSourceMap } from 'source-map';
-import { promisify } from 'util';
 import { Activity, CancelReason } from './activity';
 import { activityLogAttributes } from './activity-log-interceptor';
 import { extractNativeClient, extractReferenceHolders, InternalNativeConnection, NativeConnection } from './connection';

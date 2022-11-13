@@ -1,11 +1,11 @@
+import * as fs from 'fs';
+import path from 'path';
 import { historyFromJSON } from '@temporalio/common/lib/proto-utils';
 // eslint-disable-next-line import/default
 import proto from '@temporalio/proto';
 import test from 'ava';
-import * as fs from 'fs';
 // eslint-disable-next-line import/no-named-as-default
 import Long from 'long';
-import path from 'path';
 
 const EventType = proto.temporal.api.enums.v1.EventType;
 const ContinueAsNewInitiator = proto.temporal.api.enums.v1.ContinueAsNewInitiator;

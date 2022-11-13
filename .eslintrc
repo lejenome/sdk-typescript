@@ -43,8 +43,7 @@
     "import/no-mutable-exports": "error",
     "import/unambiguous": "error",
     "import/first": "error",
-    // TODO next PR
-    // "import/order": "error",
+    "import/order": "error",
     "import/newline-after-import": "error",
     "import/no-unassigned-import": "error",
     "import/no-named-default": "error"
